@@ -3,7 +3,6 @@ package com.fastcampus.programming.dmaker.controller;
 import com.fastcampus.programming.dmaker.dto.CreateDeveloper;
 import com.fastcampus.programming.dmaker.service.DMakerService;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,12 +27,10 @@ public class DMakerController {
   }
 
   @PostMapping("/create-developer")
-  public List<String> createDevelopers(
+  public CreateDeveloper.Response createDevelopers(
       @Valid @RequestBody CreateDeveloper.Request request) {
     log.info("request : {}", request);
 
-    dMakerService.createDeveloper(request);
-
-    return Collections.singletonList("Olaf");
+    return dMakerService.createDeveloper(request);
   }
 }

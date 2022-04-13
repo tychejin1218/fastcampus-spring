@@ -8,7 +8,6 @@ import com.fastcampus.programming.dmaker.entity.Developer;
 import com.fastcampus.programming.dmaker.exception.DMakerException;
 import com.fastcampus.programming.dmaker.repository.DeveloperRepository;
 import com.fastcampus.programming.dmaker.type.DeveloperLevel;
-import com.fastcampus.programming.dmaker.type.DeveloperSkillType;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,21 +19,27 @@ public class DMakerService {
   private final DeveloperRepository developerRepository;
 
   @Transactional
-  public void createDeveloper(
+  public CreateDeveloper.Response createDeveloper(
       CreateDeveloper.Request request) {
+
+    validateCreateDeveloperRequest(request);
+
     Developer developer = Developer.builder()
-        .developerLevel(DeveloperLevel.JUNGNIOR)
-        .developerSkillType(DeveloperSkillType.FRONT_END)
-        .experienceYears(2)
-        .name("Olaf")
-        .age(5)
+        .developerLevel(request.getDeveloperLevel())
+        .developerSkillType(request.getDeveloperSkillType())
+        .experienceYears(request.getExperienceYears())
+        .memberId(request.getMemberId())
+        .name(request.getName())
+        .age(request.getAge())
         .build();
 
     developerRepository.save(developer);
 
+    return CreateDeveloper.Response.fromEntity(developer);
   }
 
-  private void validateCreateDeveloperRequest(CreateDeveloper.Request request) {
+  private void validateCreateDeveloperRequest(
+      CreateDeveloper.Request request) {
 
     DeveloperLevel developerLevel = request.getDeveloperLevel();
     Integer experienceYears = request.getExperienceYears();
