@@ -9,6 +9,7 @@ import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,7 +28,7 @@ public class DMakerController {
   public List<DeveloperDto> getAllDevelopers() {
     log.info("GET /developers HTTP/1.1");
 
-    return dMakerService.getAllDevelopers();
+    return dMakerService.getAllEmployedDevelopers();
   }
 
   @GetMapping("/developer/{memberId}")
@@ -51,5 +52,12 @@ public class DMakerController {
       @Valid @RequestBody EditDeveloper.Request request) {
 
     return dMakerService.editDeveloper(memberId, request);
+  }
+
+  @DeleteMapping("/developer/{memberId}")
+  public DeveloperDetailDto deleteDeveloperDetail(
+      @PathVariable String memberId) {
+
+    return dMakerService.deleteDeveloper(memberId);
   }
 }

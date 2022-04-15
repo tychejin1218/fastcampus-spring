@@ -1,3 +1,2 @@
-### GET request with a header
 GET http://localhost:8080/developer/Micky
 Accept: application/json
