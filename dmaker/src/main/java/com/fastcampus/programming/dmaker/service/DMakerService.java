@@ -58,6 +58,8 @@ public class DMakerService {
         .ifPresent((developer -> {
           throw new DMakerException(DUPLICATED_MEMBER_ID);
         }));
+
+    //throw new ArrayIndexOutOfBoundsException();
   }
 
   public List<DeveloperDto> getAllEmployedDevelopers() {
