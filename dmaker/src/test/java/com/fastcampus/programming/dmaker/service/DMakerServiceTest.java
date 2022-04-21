@@ -3,6 +3,7 @@ package com.fastcampus.programming.dmaker.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
@@ -96,6 +97,8 @@ class DMakerServiceTest {
     //given
     given(developerRepository.findByMemberId(anyString()))
         .willReturn(Optional.empty());
+    given(developerRepository.save(any()))
+        .willReturn(defaultDeveloper);
 
     ArgumentCaptor<Developer> captor =
         ArgumentCaptor.forClass(Developer.class);

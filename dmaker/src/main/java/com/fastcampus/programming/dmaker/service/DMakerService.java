@@ -9,6 +9,7 @@ import com.fastcampus.programming.dmaker.dto.CreateDeveloper;
 import com.fastcampus.programming.dmaker.dto.DeveloperDetailDto;
 import com.fastcampus.programming.dmaker.dto.DeveloperDto;
 import com.fastcampus.programming.dmaker.dto.EditDeveloper;
+import com.fastcampus.programming.dmaker.dto.EditDeveloper.Request;
 import com.fastcampus.programming.dmaker.entity.Developer;
 import com.fastcampus.programming.dmaker.entity.RetiredDeveloper;
 import com.fastcampus.programming.dmaker.exception.DMakerException;
@@ -17,9 +18,10 @@ import com.fastcampus.programming.dmaker.repository.RetiredDeveloperRepository;
 import com.fastcampus.programming.dmaker.type.DeveloperLevel;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.transaction.Transactional;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -34,7 +36,13 @@ public class DMakerService {
 
     validateCreateDeveloperRequest(request);
 
-    Developer developer = Developer.builder()
+    return CreateDeveloper.Response.fromEntity(
+        developerRepository.save(createDeveloperFromRequest(request))
+    );
+  }
+
+  public Developer createDeveloperFromRequest(CreateDeveloper.Request request) {
+    return Developer.builder()
         .developerLevel(request.getDeveloperLevel())
         .developerSkillType(request.getDeveloperSkillType())
         .experienceYears(request.getExperienceYears())
@@ -43,14 +51,10 @@ public class DMakerService {
         .name(request.getName())
         .age(request.getAge())
         .build();
-
-    developerRepository.save(developer);
-
-    return CreateDeveloper.Response.fromEntity(developer);
   }
 
   private void validateCreateDeveloperRequest(
-      CreateDeveloper.Request request) {
+      @NonNull CreateDeveloper.Request request) {
 
     validateDeveloperLevel(request.getDeveloperLevel(), request.getExperienceYears());
 
@@ -62,37 +66,41 @@ public class DMakerService {
     //throw new ArrayIndexOutOfBoundsException();
   }
 
+  @Transactional(readOnly = true)
   public List<DeveloperDto> getAllEmployedDevelopers() {
     return developerRepository.findDeveloperByStatusCodeEquals(StatusCode.EMPLOYED)
         .stream().map(DeveloperDto::fromEntity)
         .collect(Collectors.toList());
   }
 
+  @Transactional(readOnly = true)
   public DeveloperDetailDto getDeveloperDetail(String memberId) {
+    return DeveloperDetailDto.fromEntity(getDeveloperByMemberId(memberId));
+  }
+
+  private Developer getDeveloperByMemberId(String memberId) {
     return developerRepository.findByMemberId(memberId)
-        .map(DeveloperDetailDto::fromEntity)
         .orElseThrow(() -> new DMakerException(NO_DEVELOPER));
   }
 
+  @Transactional
   public DeveloperDetailDto editDeveloper(
       String memberId,
       EditDeveloper.Request request) {
 
-    validateEditDeveloperRequest(request);
+    validateDeveloperLevel(request.getDeveloperLevel(), request.getExperienceYears());
 
-    Developer developer = developerRepository.findByMemberId(memberId)
-        .orElseThrow(() -> new DMakerException(NO_DEVELOPER));
+    return DeveloperDetailDto.fromEntity(
+        getUpdatedDeveloperFromRequest(request, getDeveloperByMemberId(memberId))
+    );
+  }
 
+  private Developer getUpdatedDeveloperFromRequest(Request request, Developer developer) {
     developer.setDeveloperLevel(request.getDeveloperLevel());
     developer.setDeveloperSkillType(request.getDeveloperSkillType());
     developer.setExperienceYears(request.getExperienceYears());
 
-    return DeveloperDetailDto.fromEntity(developer);
-  }
-
-  private void validateEditDeveloperRequest(
-      EditDeveloper.Request request) {
-    validateDeveloperLevel(request.getDeveloperLevel(), request.getExperienceYears());
+    return developer;
   }
 
   private void validateDeveloperLevel(DeveloperLevel developerLevel, Integer experienceYears) {
